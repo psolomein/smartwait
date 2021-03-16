@@ -2,6 +2,8 @@
 from flask import Flask,request
 import telegram
 from google.cloud import speech_v1p1beta1 as speech
+from google.cloud import storage
+
 import time
 import io
 import pandas as pd
@@ -14,18 +16,33 @@ import spacy
 from spaczz.matcher import FuzzyMatcher
 from spacy.matcher import PhraseMatcher
 from transliterate import translit, get_available_language_codes
+from pyngrok import ngrok
+
 # nlp = spacy.load("ru_core_news_lg") # Large one = 2.5Gb
 nlp = spacy.load("ru_core_news_sm") # Small one for testing
 
 from app.processing.speech_to_text import google_stt
 from app.processing.menu_matching import remove_stopwords,menu_preprocessing,text_preprocessing,find_matches,print_result
-
 # Define the WSGI application object
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+#ngrok
+def init_webhooks(base_url):
+    # Update inbound traffic via APIs to use the public-facing ngrok URL
+    pass
+
+if app.config.get("ENV") == "development" and app.config["USE_NGROK"]:
+    port = 5033
+    # Open a ngrok tunnel to the dev server
+    public_url = ngrok.connect(port).public_url
+    print(" * ngrok tunnel \"{}\" -> \"http://0.0.0.0:{}\"".format(public_url, port))
+    # Update any base URLs or webhooks to use the public ngrok URL
+    app.config["BASE_URL"] = public_url.replace('http','https')+'/'
+    init_webhooks(public_url)
+
 
 TOKEN = app.config.get('TOKEN')
-URL = app.config.get('URL')
+URL = app.config.get('BASE_URL')
                     
 bot = telegram.Bot(token=TOKEN)
 
@@ -34,14 +51,11 @@ if s:
     print("webhook setup ok")
 else:
     print("webhook setup failed")
-    
-# @app.route('/setwebhook', methods=['GET', 'POST'])
-# def set_webhook():
-#     s = bot.setWebhook('{URL}{HOOK}'.format(URL=URL, HOOK=TOKEN))
-#     if s:
-#         return "webhook setup ok"
-#     else:
-#         return "webhook setup failed"   
+ 
+
+@app.route('/test_comms')
+def test():
+    return 'test ok!'
 
 @app.route('/{}'.format(TOKEN), methods=['POST'])
 def application():

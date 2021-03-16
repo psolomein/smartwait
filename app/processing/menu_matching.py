@@ -57,7 +57,7 @@ def text_preprocessing(x,dishlist):
     # Drop stop words
     x = remove_stopwords(x)
     # Transliterate
-    x = translit(x, 'ru')
+#     x = translit(x, 'ru')
     print('Processed:',x)
     return x,dishlist
 

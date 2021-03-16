@@ -1,0 +1,3 @@
+Order:  3 пива heineken 
+
+Dish: пиво heineken | qty: 3

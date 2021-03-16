@@ -1,0 +1,4 @@
+Order:  две брускетты одну лазанью мясную 33 minestrone аи limoncello 10 
+
+Dish: брускетты | qty: 10
+Dish: лазанья мясная | qty: 1

@@ -1,0 +1,3 @@
+Order:  давай пиво heineken 
+
+Dish: пиво heineken | qty: 1
