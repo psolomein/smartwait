@@ -2,3 +2,5 @@ config.py
 /env
 /app/audio
 /app/trancsripts
+/app/config.py
+*nohup*

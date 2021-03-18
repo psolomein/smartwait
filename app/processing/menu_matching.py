@@ -8,7 +8,12 @@ def remove_stopwords(x):
                'хотим','так','бы','наверное','вот','этот','эти','эта','это',
                'которая','которые','которое','который','которых','вам','ваш',
                'ваша','ваши','вашим','ваших','будьте','добры','все','будут',
-               'будет','меня','потом','заказать','например','заказ','сделать','у','ой','а']
+               'будет','меня','потом','заказать','например','заказ','сделать','у','ой','а',
+# Todo: place обычный in regex and make synonyms to child dishes - which one is the regular?         
+               'обычный','обычную','обычные',
+                # TODO: Frequent problem with десерт павлова
+                'на','десерт'
+               ]
     
     x  = [word for word in x.split() if word not in stoplist]
     x = ' '.join(x)
@@ -39,9 +44,9 @@ def menu_preprocessing(nlp,
     # Init matcher
     matcher = FuzzyMatcher(nlp.vocab)
     for i,l in enumerate(dishlist):
-        matcher.add(i, [nlp(l)], kwargs=[{"fuzzy_func": "simple",
+        matcher.add(i, [nlp(l)], kwargs=[{"fuzzy_func": "token_sort",
                                           "flex":len(l.split())//2,
-                                          "min_r2":70}])
+                                          "min_r2":65}])
     return dishlist,matcher
 
 def text_preprocessing(x,dishlist):
@@ -57,7 +62,7 @@ def text_preprocessing(x,dishlist):
     # Drop stop words
     x = remove_stopwords(x)
     # Transliterate
-#     x = translit(x, 'ru')
+    x = translit(x, 'ru')
     print('Processed:',x)
     return x,dishlist
 
@@ -68,6 +73,18 @@ def find_matches(x,dishlist,nlp,matcher):
     '''
     print('Looking for matches...')
     doc = nlp(x)
+    
+    ## Configure matcher - custom rules
+    # try fixes - WORKS!!!
+    matcher.patterns[44]['kwargs']['fuzzy_func']='simple'
+    # long names - partial sort is goooood :)
+    matcher.patterns[32]['kwargs']['fuzzy_func']='partial_token_sort'
+    matcher.patterns[144]['kwargs']['fuzzy_func']='partial_token_sort'
+    
+    matcher.patterns[109]['kwargs']['flex']=2
+    matcher.patterns[109]['kwargs']['flex']=2
+    matcher.patterns[109]['kwargs']['flex']=2
+    
     matches = matcher(doc)
     # Process results
     fdf = pd.DataFrame(matches,columns=['match_id','start','end','ratio'])
